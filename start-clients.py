@@ -103,6 +103,7 @@ def form_mcblaster_args(
         write_rate=None,
         value_size=50,
         duration=5,
+        generation=0,
 ):
     args = [MCBLASTER_PATH]
     if tcp_port > 0:
@@ -117,6 +118,8 @@ def form_mcblaster_args(
         args.extend(["-t", str(nb_threads)])
     if write_rate is not None:
         args.extend(["-w", str(write_rate)])
+    if generation > 0:
+        args.extend(["-g", str(generation)])
     args.extend(["-k", str(key_size), "-z", str(value_size)])
     args.extend(["-d", str(duration)])
     args.append(server)
@@ -218,6 +221,7 @@ if __name__ == '__main__':
         write_rate,
         value_size,
         duration,
+        generation,
     )
 
     clients = start_clients(mcblaster_args, generation, nb_clients)
