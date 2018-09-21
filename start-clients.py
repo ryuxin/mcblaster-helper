@@ -6,8 +6,9 @@ import os
 # path to mcblaster EXECUTABLE
 MCBLASTER_PATH = os.environ['MCBLASTER_PATH']
 # indexes into mcblaster argument string
-port_index = 2
-flow_index = 4
+port_index = 5
+flow_index = 7
+core_index = 2
 
 
 class stats(object):
@@ -103,9 +104,12 @@ def form_mcblaster_args(
         write_rate=None,
         value_size=50,
         duration=5,
+        core=0,
         generation=0,
 ):
-    args = [MCBLASTER_PATH]
+    args = ["taskset"]
+    args.extend(["-c", str(core)])
+    args.extend([MCBLASTER_PATH])
     if tcp_port > 0:
         args.extend(["-p", str(tcp_port)])
     else:
@@ -151,6 +155,18 @@ def increment_flow_mcblaster_args(mcblaster_args):
     mcblaster_args[flow_index] = str(int(mcblaster_args[flow_index]) + 1)
 
 
+def increment_core_mcblaster_args(mcblaster_args):
+    """
+    Increment the running core of the mcblaster arguments list.
+    Note that if the arguments list structure is changed, the
+    core index should be changed as well.
+    :param mcblaster_args: List of strings that will eventually
+     be called with mcblaster.
+    :return:
+    """
+    mcblaster_args[core_index] = str(int(mcblaster_args[core_index]) + 1)
+
+
 def start_clients(mcblaster_args, generation=0, nb_clients=1):
     """
     Creates n client objects that will blast memcached servers.
@@ -169,6 +185,7 @@ def start_clients(mcblaster_args, generation=0, nb_clients=1):
         client_list.append(client(mcblaster_args))
         increment_port_mcblaster_args(mcblaster_args)
         increment_flow_mcblaster_args(mcblaster_args)
+        increment_core_mcblaster_args(mcblaster_args)
     return client_list
 
 
@@ -205,6 +222,7 @@ if __name__ == '__main__':
     duration = args.duration if args.duration else 5
     generation = args.g if args.g else 0
     nb_clients = args.nb_clients if args.nb_clients else 1
+    core = 0
 
     if read_rate == 0 and write_rate == 0:
         print "Must specify set rate (-w) or get rate (-r) or both."
@@ -221,6 +239,7 @@ if __name__ == '__main__':
         write_rate,
         value_size,
         duration,
+        core,
         generation,
     )
 
