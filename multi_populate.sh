@@ -8,9 +8,9 @@ python start-clients.py \
 -t 1 \
 -z 135 \
 -r 0 \
--w 50000 \
---nb_clients 16 \
---nb_servers 16 \
+-w 5000 \
+--nb_clients $2 \
+--nb_servers $1 \
 --nb_core 32 \
 --duration 10 \
 --server 10.10.2.2
