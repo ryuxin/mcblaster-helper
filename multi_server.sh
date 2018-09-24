@@ -5,4 +5,4 @@ python start-servers.py \
 -u 11211 \
 -t 1 \
 --nb_core 16 \
---nb_servers 2
+--nb_servers $1
