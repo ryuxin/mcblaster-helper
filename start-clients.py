@@ -269,13 +269,13 @@ if __name__ == '__main__':
             slow_clients.append(client)
             continue
         client_count += 1
-        total_stats.throughput += read_stats.throughput
-        total_stats.avg += read_stats.avg
-        for (interval_start, height) in read_stats.lat_distribution:
-            try:
-                total_stats.lat_distribution[interval_start] += height
-            except KeyError:
-                total_stats.lat_distribution[interval_start] = height
+        # total_stats.throughput += read_stats.throughput
+        # total_stats.avg += read_stats.avg
+        # for (interval_start, height) in read_stats.lat_distribution:
+        #     try:
+        #         total_stats.lat_distribution[interval_start] += height
+        #     except KeyError:
+        #         total_stats.lat_distribution[interval_start] = height
 
     for client in slow_clients:
         read_stats = client.get_stats("get")
@@ -284,15 +284,15 @@ if __name__ == '__main__':
             print "Client with dest port {} is STUCK! Moving on".format(client.port)
             continue
         client_count += 1
-        total_stats.throughput += read_stats.throughput
-        total_stats.avg += read_stats.avg
-        for interval_start, height in read_stats.lat_distribution.iteritems():
-            try:
-                total_stats.lat_distribution[interval_start] += height
-            except KeyError:
-                total_stats.lat_distribution[interval_start] = height
+        # total_stats.throughput += read_stats.throughput
+        # total_stats.avg += read_stats.avg
+        # for interval_start, height in read_stats.lat_distribution.iteritems():
+        #     try:
+        #         total_stats.lat_distribution[interval_start] += height
+        #     except KeyError:
+        #         total_stats.lat_distribution[interval_start] = height
 
-    total_stats.avg /= client_count
+    # total_stats.avg /= client_count
 
-    print "Aggregated statistics for {} clients: ".format(client_count)
+    # print "Aggregated statistics for {} clients: ".format(client_count)
     total_stats.pretty_print()
