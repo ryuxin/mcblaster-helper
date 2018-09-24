@@ -3,6 +3,10 @@ import time
 import argparse
 import os
 
+nservers = 0
+cur_port = 0
+ncores = 0
+
 # path to mcblaster EXECUTABLE
 MCBLASTER_PATH = os.environ['MCBLASTER_PATH']
 # indexes into mcblaster argument string
@@ -32,6 +36,7 @@ class client(object):
         self.log_file_path, log_file = self.create_log()
         self.read_stats = None
         self.write_stats = None
+        # print self.args
         self.process = subprocess.Popen(self.args, stdout=log_file)
         log_file.close()
 
@@ -131,7 +136,7 @@ def form_mcblaster_args(
     return args
 
 
-def increment_port_mcblaster_args(mcblaster_args):
+def increment_port_mcblaster_args(mcblaster_args, us, ue):
     """
     Increment the port value of the mcblaster arguments list.
     Note that if the arguments list structure is changed, the
@@ -140,7 +145,9 @@ def increment_port_mcblaster_args(mcblaster_args):
      be called with mcblaster.
     :return:
     """
-    mcblaster_args[port_index] = str(int(mcblaster_args[port_index]) + 1)
+    up = int(mcblaster_args[port_index]) + 1
+    if up >= ue: up = us
+    mcblaster_args[port_index] = str(up)
 
 
 def increment_flow_mcblaster_args(mcblaster_args):
@@ -164,10 +171,10 @@ def increment_core_mcblaster_args(mcblaster_args):
      be called with mcblaster.
     :return:
     """
-    mcblaster_args[core_index] = str(int(mcblaster_args[core_index]) + 1)
+    mcblaster_args[core_index] = str((int(mcblaster_args[core_index]) + 1) % ncores)
 
 
-def start_clients(mcblaster_args, generation=0, nb_clients=1):
+def start_clients(mcblaster_args, nb_clients, us, ue):
     """
     Creates n client objects that will blast memcached servers.
     :param mcblaster_args: List of strings that will eventually
@@ -183,7 +190,7 @@ def start_clients(mcblaster_args, generation=0, nb_clients=1):
 
     for i in range(nb_clients):
         client_list.append(client(mcblaster_args))
-        increment_port_mcblaster_args(mcblaster_args)
+        increment_port_mcblaster_args(mcblaster_args, us, ue)
         increment_flow_mcblaster_args(mcblaster_args)
         increment_core_mcblaster_args(mcblaster_args)
     return client_list
@@ -203,6 +210,8 @@ def parse_args():
     parser.add_argument("-g", help="generation value", type=int)
     parser.add_argument("--nb_clients", help="number of clients to create", type=int)
     parser.add_argument("--duration", help="duration of client in seconds", type=int)
+    parser.add_argument("--nb_servers", help="number of server instances", type=int)
+    parser.add_argument("--nb_core", help="number of cores", type=int)
     return parser.parse_args()
 
 
@@ -222,6 +231,8 @@ if __name__ == '__main__':
     duration = args.duration if args.duration else 5
     generation = args.g if args.g else 0
     nb_clients = args.nb_clients if args.nb_clients else 1
+    nservers = args.nb_servers if args.nb_servers else 1
+    ncores = args.nb_core if args.nb_servers else 1
     core = 0
 
     if read_rate == 0 and write_rate == 0:
@@ -243,7 +254,7 @@ if __name__ == '__main__':
         generation,
     )
 
-    clients = start_clients(mcblaster_args, generation, nb_clients)
+    clients = start_clients(mcblaster_args, nb_clients, udp_port, udp_port + nservers)
 
     # give the clients a chance to talk to their servers
     time.sleep(duration + 1)
