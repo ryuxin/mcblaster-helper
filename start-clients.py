@@ -32,7 +32,7 @@ class stats(object):
 class client(object):
     def __init__(self, mcblaster_args):
         self.args = mcblaster_args
-        self.port = mcblaster_args[port_index]
+        self.port = mcblaster_args[flow_index]
         self.log_file_path, log_file = self.create_log()
         self.read_stats = None
         self.write_stats = None
@@ -56,7 +56,7 @@ class client(object):
         if "get" == request_type:
             stats = self.read_stats
         elif "set" == request_type:
-            stats = self.read_stats
+            stats = self.write_stats
         else:
             return None
         if stats is None:
@@ -264,7 +264,8 @@ if __name__ == '__main__':
 
     for client in clients:
         read_stats = client.get_stats("get")
-        if read_stats is None:
+        w_stats = client.get_stats("set")
+        if read_stats is None and w_stats is None:
             slow_clients.append(client)
             continue
         client_count += 1
@@ -278,7 +279,8 @@ if __name__ == '__main__':
 
     for client in slow_clients:
         read_stats = client.get_stats("get")
-        if read_stats is None:
+        w_stats = client.get_stats("set")
+        if read_stats is None and w_stats is None:
             print "Client with dest port {} is STUCK! Moving on".format(client.port)
             continue
         client_count += 1
