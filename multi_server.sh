@@ -1,5 +1,7 @@
 #!/bin/sh
 
+sudo killall memcached
+
 python start-servers.py \
 -p 0 \
 -u 11211 \
