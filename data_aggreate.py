@@ -12,10 +12,12 @@ class stats(object):
         self.request_type = request_type
         self.throughput = throughput
         self.avg = avg
+        self.nsent = 0
         self.lat_distribution = ld
 
     def pretty_print(self):
         print "request type: {}".format(self.request_type)
+        print "Requests sent: {}".format(self.nsent)
         print "throughput: {} requests per second".format(self.throughput)
         print "average: {} us".format(self.avg)
         # print "latency distribution: {}".format(self.lat_distribution)
@@ -34,6 +36,8 @@ def parse_stats(fn):
                     curr_stats = read_stats = stats(request_type)
                 else:
                     curr_stats = write_stats = stats(request_type)
+            elif line.startswith("Requests sent"):
+                curr_stats.nsent = int(line.split(None)[-1].strip())
             elif line.startswith("Measured RTTs"):
                 curr_stats.throughput = int(line.split(None)[-1].strip())
             elif line.startswith("RTT min"):
@@ -60,6 +64,7 @@ def aggreate(sl, rtype):
     total_stats = stats(rtype, throughput=0, avg=0)
 
     for sat in sl:
+        total_stats.nsent += sat.nsent
         total_stats.throughput += sat.throughput
         total_stats.avg += sat.avg
 
@@ -71,8 +76,9 @@ def aggreate(sl, rtype):
 for f in log_files:
     fn = log_dir + f;
     rs, ws = parse_stats(fn)
-    # rs.pretty_print()
-    rlist.append(rs)
-    wlist.append(ws)
+    # print fn
+    # if rs != None: rs.pretty_print()
+    if rs != None: rlist.append(rs)
+    if ws != None: wlist.append(ws)
 aggreate(rlist, "get")
 
