@@ -1,7 +1,7 @@
 import os
 import sys
 
-durtime = 10
+durtime = 100
 log_dir = sys.argv[1]
 log_files = os.listdir(log_dir)
 rlist = list()
