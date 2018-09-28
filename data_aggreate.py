@@ -13,13 +13,15 @@ class stats(object):
         self.throughput = throughput
         self.avg = avg
         self.nsent = 0
+        self.timeout = 0
         self.lat_distribution = ld
 
     def pretty_print(self):
-        print "request type: {}".format(self.request_type)
+        print "request type : {}".format(self.request_type)
         print "Requests sent: {}".format(self.nsent)
-        print "throughput: {} requests per second".format(self.throughput)
-        print "average: {} us".format(self.avg)
+        print "Timeouts     : {}".format(self.timeout)
+        print "throughput   : {} requests per second".format(self.throughput)
+        print "average      : {} us".format(self.avg)
         # print "latency distribution: {}".format(self.lat_distribution)
 
 
@@ -38,6 +40,8 @@ def parse_stats(fn):
                     curr_stats = write_stats = stats(request_type)
             elif line.startswith("Requests sent"):
                 curr_stats.nsent = int(line.split(None)[-1].strip())
+            elif line.startswith("Timeouts"):
+                curr_stats.timeout = int(line.split(None)[-1].strip())
             elif line.startswith("Measured RTTs"):
                 curr_stats.throughput = int(line.split(None)[-1].strip())
             elif line.startswith("RTT min"):
@@ -65,6 +69,7 @@ def aggreate(sl, rtype):
 
     for sat in sl:
         total_stats.nsent += sat.nsent
+        total_stats.timeout += sat.timeout
         total_stats.throughput += sat.throughput
         total_stats.avg += sat.avg
 
